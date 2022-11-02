@@ -2,9 +2,7 @@ module.exports = {
     apps: [
         {
             name: '', // Your project name
-            cwd: './', // Path to your project
-            script: 'yarn', // For this example we're using npm, could also be yarn
-            interpreter: '/bin/bash',
+            script: 'npm', // For this example we're using npm, could also be yarn
             args: 'start', // Script to start the Strapi server, `start` by default
             env: {
                 APP_KEYS: '', // you can find it in your project .env file.
