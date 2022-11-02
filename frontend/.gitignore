@@ -1,0 +1,13 @@
+.cache/
+
+### Visual Studio Code ###
+.vscode
+
+.yarnrc
+node_modules
+.bash_history
+
+e2e/**/*.war
+**/cypress/**/*.png
+
+**/cypress-e2e-dynamic.json

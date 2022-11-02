@@ -1,0 +1,47 @@
+version: "3"
+services:
+  frontend:
+    image: frontend:latest
+    container_name: frontend
+    build:
+      context: ./frontend
+    ports:
+      - "80:80"
+    environment:
+      NODE_ENV: production
+    networks:
+      - frontend
+
+  backend:
+    image: backend:latest
+    container_name: backend
+    build:
+      context: ./backend
+    restart: unless-stopped
+    env_file: ./backend/.env
+    environment:
+      # DATABASE_CLIENT: ${DATABASE_CLIENT}
+      # DATABASE_HOST: strapiDB
+      # DATABASE_PORT: ${DATABASE_PORT}
+      # DATABASE_NAME: ${DATABASE_NAME}
+      # DATABASE_USERNAME: ${DATABASE_USERNAME}
+      # DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      # JWT_SECRET: ${JWT_SECRET}
+      # ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET}
+      # APP_KEYS: ${APP_KEYS}
+      NODE_ENV: production
+    volumes:
+      - ./backend/config:/opt/app/config
+      - ./backend/src:/opt/app/src
+      - ./backend/package.json:/opt/package.json
+      - ./backend/yarn.lock:/opt/yarn.lock
+      - ./backend/.env:/opt/app/.env
+      - ./backend/public/uploads:/opt/app/public/uploads
+    ports:
+      - '1337:1337'
+    networks:
+      - backend
+
+networks:
+  frontend:
+  backend:
