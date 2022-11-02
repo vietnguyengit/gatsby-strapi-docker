@@ -20,15 +20,6 @@ services:
     restart: unless-stopped
     env_file: ./backend/.env
     environment:
-      # DATABASE_CLIENT: ${DATABASE_CLIENT}
-      # DATABASE_HOST: strapiDB
-      # DATABASE_PORT: ${DATABASE_PORT}
-      # DATABASE_NAME: ${DATABASE_NAME}
-      # DATABASE_USERNAME: ${DATABASE_USERNAME}
-      # DATABASE_PASSWORD: ${DATABASE_PASSWORD}
-      # JWT_SECRET: ${JWT_SECRET}
-      # ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET}
-      # APP_KEYS: ${APP_KEYS}
       NODE_ENV: production
     volumes:
       - ./backend/config:/opt/app/config
