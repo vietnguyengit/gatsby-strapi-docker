@@ -113,3 +113,6 @@ exports
 dist
 build
 .strapi-updater.json
+
+#PM2
+ecosystem.config.js
