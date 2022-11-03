@@ -1,20 +1,43 @@
 version: "3"
 services:
+  traefik:
+    image: "traefik:v2.9"
+    container_name: "traefik"
+    command:
+      #- "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+
   frontend:
     image: frontend:latest
     container_name: frontend
+    depends_on:
+      - backend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`localhost`)"
+      - "traefik.http.services.frontend.loadbalancer.server.port=80"
+      - "traefik.http.routers.frontend.entrypoints=web"
     build:
       context: ./frontend
-    ports:
-      - "80:80"
     environment:
       NODE_ENV: production
-    networks:
-      - frontend
 
   backend:
     image: backend:latest
     container_name: backend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=Host(`backend.localhost`)"
+      - "traefik.http.services.backend.loadbalancer.server.port=1337"
+      - "traefik.http.routers.backend.entrypoints=web"
     build:
       context: ./backend
     restart: unless-stopped
@@ -27,12 +50,3 @@ services:
       - ./backend/package.json:/opt/package.json
       - ./backend/yarn.lock:/opt/yarn.lock
       - ./backend/.env:/opt/app/.env
-      - ./backend/public/uploads:/opt/app/public/uploads
-    ports:
-      - '1337:1337'
-    networks:
-      - backend
-
-networks:
-  frontend:
-  backend:
