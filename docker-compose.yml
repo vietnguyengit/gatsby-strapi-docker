@@ -22,7 +22,7 @@ services:
       - backend
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.frontend.rule=Host(`localhost`)"
+      - "traefik.http.routers.frontend.rule=Host(`localhost`) || Host(`simis.com.au`)"
       - "traefik.http.services.frontend.loadbalancer.server.port=80"
       - "traefik.http.routers.frontend.entrypoints=web"
     build:
@@ -35,7 +35,7 @@ services:
     container_name: backend
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.backend.rule=Host(`backend.localhost`)"
+      - "traefik.http.routers.backend.rule=Host(`backend.localhost`) || Host(`backend.simis.com.au`)"
       - "traefik.http.services.backend.loadbalancer.server.port=1337"
       - "traefik.http.routers.backend.entrypoints=web"
     build:
