@@ -11,3 +11,5 @@ e2e/**/*.war
 **/cypress/**/*.png
 
 **/cypress-e2e-dynamic.json
+
+public/
