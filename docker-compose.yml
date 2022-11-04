@@ -16,8 +16,8 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
 
   frontend:
-    image: frontend:latest
-    container_name: frontend
+    image: gatsby-frontend:latest
+    container_name: gatsby-frontend
     depends_on:
       - backend
     labels:
@@ -31,8 +31,8 @@ services:
       NODE_ENV: production
 
   backend:
-    image: backend:latest
-    container_name: backend
+    image: gatsby-backend:latest
+    container_name: gatsby-backend
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.backend.rule=Host(`backend.localhost`) || Host(`backend.simis.com.au`)"
