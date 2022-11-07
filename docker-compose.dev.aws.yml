@@ -32,18 +32,12 @@ x-aws-cloudformation:
         DomainValidationOptions:
           - DomainName: dev.vietnguyen.me
             ValidationDomain: dev.vietnguyen.me
-          - DomainName: www.dev.vietnguyen.me
-            ValidationDomain: dev.vietnguyen.me
           - DomainName: backend.dev.vietnguyen.me
-            ValidationDomain: dev.vietnguyen.me
-          - DomainName: www.backend.dev.vietnguyen.me
             ValidationDomain: dev.vietnguyen.me
         ValidationMethod: DNS
         SubjectAlternativeNames:
           - dev.vietnguyen.me
-          - www.dev.vietnguyen.me
           - backend.dev.vietnguyen.me
-          - www.backend.dev.vietnguyen.me
 
     ########## LoadBalancer ############
     LoadBalancer:
@@ -148,7 +142,6 @@ x-aws-cloudformation:
             HostHeaderConfig:
               Values:
                 - backend.dev.vietnguyen.me
-                - www.backend.dev.vietnguyen.me
         ListenerArn:
           Ref: HTTPSListener
         Priority: 1
@@ -169,42 +162,12 @@ x-aws-cloudformation:
             Fn::GetAtt:
               - LoadBalancer
               - CanonicalHostedZoneID
-    NginxAWWWRecord:
-      Type: AWS::Route53::RecordSet
-      Properties:
-        HostedZoneId: Z070724917YT1GVCLNNMA
-        Type: A
-        Name: www.dev.vietnguyen.me
-        AliasTarget:
-          DNSName:
-            Fn::GetAtt:
-              - LoadBalancer
-              - DNSName
-          HostedZoneId:
-            Fn::GetAtt:
-              - LoadBalancer
-              - CanonicalHostedZoneID
     BackendARecord:
       Type: AWS::Route53::RecordSet
       Properties:
         HostedZoneId: Z070724917YT1GVCLNNMA
         Type: A
         Name: backend.dev.vietnguyen.me
-        AliasTarget:
-          DNSName:
-            Fn::GetAtt:
-              - LoadBalancer
-              - DNSName
-          HostedZoneId:
-            Fn::GetAtt:
-              - LoadBalancer
-              - CanonicalHostedZoneID
-    BackendAWWWRecord:
-      Type: AWS::Route53::RecordSet
-      Properties:
-        HostedZoneId: Z070724917YT1GVCLNNMA
-        Type: A
-        Name: www.backend.dev.vietnguyen.me
         AliasTarget:
           DNSName:
             Fn::GetAtt:
