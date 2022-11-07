@@ -1,11 +1,9 @@
-version: "3"
 services:
-  traefik:
-    image: "traefik:v2.9"
-    container_name: "traefik"
+  loadbalancer:
+    image: traefik:latest
     command:
       #- "--log.level=DEBUG"
-#      - "--api.insecure=true"
+      - "--api.insecure=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
@@ -15,38 +13,39 @@ services:
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
 
-  frontend:
-    image: gatsby-frontend:latest
-    container_name: gatsby-frontend
+  nginx:
+    image: vietnguyen-nginx
+    build:
+      context: ./frontend/nginx
     depends_on:
-      - backend
+      - loadbalancer
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.frontend.rule=Host(`localhost`) || Host(`simis.com.au`)"
-      - "traefik.http.services.frontend.loadbalancer.server.port=80"
+      - "traefik.http.routers.frontend.rule=Host(`localhost`)"
+      - "traefik.http.services.frontend.loadbalancer.server.port=82"
       - "traefik.http.routers.frontend.entrypoints=web"
+
+  frontend:
+    image: vietnguyen-frontend
+    depends_on:
+      - nginx
+      - backend
     build:
       context: ./frontend
     environment:
-      NODE_ENV: production
+      NODE_ENV: dev
 
   backend:
-    image: gatsby-backend:latest
-    container_name: gatsby-backend
+    image: vietnguyen-backend
+    depends_on:
+      - loadbalancer
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.backend.rule=Host(`backend.localhost`) || Host(`backend.simis.com.au`)"
-      - "traefik.http.services.backend.loadbalancer.server.port=1337"
+      - "traefik.http.routers.backend.rule=Host(`backend.localhost`)"
+      - "traefik.http.services.backend.loadbalancer.server.port=81"
       - "traefik.http.routers.backend.entrypoints=web"
     build:
       context: ./backend
     restart: unless-stopped
-    env_file: ./backend/.env
     environment:
-      NODE_ENV: production
-    volumes:
-      - ./backend/config:/opt/app/config
-      - ./backend/src:/opt/app/src
-      - ./backend/package.json:/opt/package.json
-      - ./backend/yarn.lock:/opt/yarn.lock
-      - ./backend/.env:/opt/app/.env
+      NODE_ENV: dev
