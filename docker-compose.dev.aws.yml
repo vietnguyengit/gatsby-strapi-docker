@@ -9,13 +9,6 @@ x-aws-cloudformation:
         DefaultCapacityProviderStrategy:
           - CapacityProvider: FARGATE_SPOT
             Weight: 1
-    FrontendService:
-      Properties:
-        NetworkConfiguration:
-          AwsvpcConfiguration:
-            Subnets:
-              - subnet-04af0996863377d0a #public subnet-1
-              - subnet-011d3777f6e1f6187 #public subnet-2
     NginxService:
       Properties:
         NetworkConfiguration:
@@ -223,7 +216,7 @@ x-aws-cloudformation:
               - CanonicalHostedZoneID
 
 services:
-  frontend:
+  nginx:
     image: 900657927515.dkr.ecr.ap-southeast-2.amazonaws.com/vietnguyen-frontend:latest
     deploy:
       x-aws-autoscaling:
