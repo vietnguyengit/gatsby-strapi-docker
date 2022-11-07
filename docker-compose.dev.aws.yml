@@ -9,7 +9,7 @@ x-aws-cloudformation:
         DefaultCapacityProviderStrategy:
           - CapacityProvider: FARGATE_SPOT
             Weight: 1
-    NginxService:
+    FrontendService:
       Properties:
         NetworkConfiguration:
           AwsvpcConfiguration:
@@ -34,10 +34,16 @@ x-aws-cloudformation:
             ValidationDomain: dev.vietnguyen.me
           - DomainName: backend.dev.vietnguyen.me
             ValidationDomain: dev.vietnguyen.me
+          - DomainName: www.dev.vietnguyen.me
+            ValidationDomain: dev.vietnguyen.me
+          - DomainName: www.backend.dev.vietnguyen.me
+            ValidationDomain: dev.vietnguyen.me
         ValidationMethod: DNS
         SubjectAlternativeNames:
           - dev.vietnguyen.me
           - backend.dev.vietnguyen.me
+          - www.backend.dev.vietnguyen.me
+          - www.dev.vietnguyen.me
 
     ########## LoadBalancer ############
     LoadBalancer:
@@ -47,36 +53,13 @@ x-aws-cloudformation:
         Subnets:
           - subnet-04af0996863377d0a #public subnet-1
           - subnet-011d3777f6e1f6187 #public subnet-2
-    DefaultNetwork:
-      Properties:
-        SecurityGroupIngress:
-          - Description: HTTP IPv4
-            IpProtocol: tcp
-            FromPort: 80
-            ToPort: 80
-            CidrIp: 0.0.0.0/0
-          - Description: HTTP IPv6
-            IpProtocol: tcp
-            FromPort: 80
-            ToPort: 80
-            CidrIpv6: ::/0
-          - Description: HTTPS IPv4
-            IpProtocol: tcp
-            FromPort: 443
-            ToPort: 443
-            CidrIp: 0.0.0.0/0
-          - Description: HTTPS IPv6
-            IpProtocol: tcp
-            FromPort: 443
-            ToPort: 443
-            CidrIpv6: ::/0
 
     ########## LoadBalancer Listeners ############
-    NginxTCP82Listener:
+    FrontendTCP82Listener:
       Properties:
         Protocol: HTTP
 
-    NginxTCP82TargetGroup:
+    FrontendTCP82TargetGroup:
       Properties:
         Protocol: HTTP
 
@@ -110,7 +93,7 @@ x-aws-cloudformation:
     HTTPSListener:
       DependsOn:
         - LoadBalancerSSLCert
-        - NginxTCP82TargetGroup
+        - FrontendTCP82TargetGroup
       Type: AWS::ElasticLoadBalancingV2::Listener
       Properties:
         Certificates:
@@ -119,7 +102,7 @@ x-aws-cloudformation:
         DefaultActions:
           - Type: forward
             TargetGroupArn:
-              Ref: NginxTCP82TargetGroup
+              Ref: FrontendTCP82TargetGroup
             Order: 1
         LoadBalancerArn:
           Ref: LoadBalancer
@@ -142,12 +125,13 @@ x-aws-cloudformation:
             HostHeaderConfig:
               Values:
                 - backend.dev.vietnguyen.me
+                - www.backend.dev.vietnguyen.me
         ListenerArn:
           Ref: HTTPSListener
         Priority: 1
 
     ########## Route53 ############
-    NginxARecord:
+    FrontendARecord:
       Type: AWS::Route53::RecordSet
       Properties:
         HostedZoneId: Z070724917YT1GVCLNNMA
@@ -162,6 +146,7 @@ x-aws-cloudformation:
             Fn::GetAtt:
               - LoadBalancer
               - CanonicalHostedZoneID
+
     BackendARecord:
       Type: AWS::Route53::RecordSet
       Properties:
@@ -178,8 +163,40 @@ x-aws-cloudformation:
               - LoadBalancer
               - CanonicalHostedZoneID
 
+    FrontendAWWWRecord:
+      Type: AWS::Route53::RecordSet
+      Properties:
+        HostedZoneId: Z070724917YT1GVCLNNMA
+        Type: A
+        Name: www.dev.vietnguyen.me
+        AliasTarget:
+          DNSName:
+            Fn::GetAtt:
+              - LoadBalancer
+              - DNSName
+          HostedZoneId:
+            Fn::GetAtt:
+              - LoadBalancer
+              - CanonicalHostedZoneID
+
+    BackendAWWWRecord:
+      Type: AWS::Route53::RecordSet
+      Properties:
+        HostedZoneId: Z070724917YT1GVCLNNMA
+        Type: A
+        Name: www.backend.dev.vietnguyen.me
+        AliasTarget:
+          DNSName:
+            Fn::GetAtt:
+              - LoadBalancer
+              - DNSName
+          HostedZoneId:
+            Fn::GetAtt:
+              - LoadBalancer
+              - CanonicalHostedZoneID
+
 services:
-  nginx:
+  frontend:
     image: 900657927515.dkr.ecr.ap-southeast-2.amazonaws.com/vietnguyen-frontend:latest
     deploy:
       x-aws-autoscaling:
@@ -212,3 +229,8 @@ services:
       NODE_ENV: dev
     ports:
       - "81:81"
+
+networks:
+  default:
+    external: true
+    name: 'sg-0a1957931895e2543'
