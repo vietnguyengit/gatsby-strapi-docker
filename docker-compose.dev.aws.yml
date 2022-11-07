@@ -223,22 +223,6 @@ x-aws-cloudformation:
               - CanonicalHostedZoneID
 
 services:
-  nginx:
-    image: 900657927515.dkr.ecr.ap-southeast-2.amazonaws.com/vietnguyen-nginx:latest
-    deploy:
-      x-aws-autoscaling:
-        min: 1
-        max: 2
-        cpu: 65
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 1024M
-    build:
-      context: ./frontend/nginx
-    ports:
-      - "82:82"
-
   frontend:
     image: 900657927515.dkr.ecr.ap-southeast-2.amazonaws.com/vietnguyen-frontend:latest
     deploy:
@@ -252,8 +236,8 @@ services:
           memory: 1024M
     build:
       context: ./frontend
-    environment:
-      NODE_ENV: dev
+    ports:
+      - "82:82"
 
   backend:
     image: 900657927515.dkr.ecr.ap-southeast-2.amazonaws.com/vietnguyen-backend:latest

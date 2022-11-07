@@ -9,14 +9,14 @@ services:
       - "--entrypoints.web.address=:80"
     ports:
       - "80:80"
-      - "8080:8080"
+      - "8081:8081"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
 
-  nginx:
-    image: vietnguyen-nginx
+  frontend:
+    image: vietnguyen-frontend
     build:
-      context: ./frontend/nginx
+      context: ./frontend
     depends_on:
       - loadbalancer
     labels:
@@ -24,16 +24,6 @@ services:
       - "traefik.http.routers.frontend.rule=Host(`localhost`)"
       - "traefik.http.services.frontend.loadbalancer.server.port=82"
       - "traefik.http.routers.frontend.entrypoints=web"
-
-  frontend:
-    image: vietnguyen-frontend
-    depends_on:
-      - nginx
-      - backend
-    build:
-      context: ./frontend
-    environment:
-      NODE_ENV: dev
 
   backend:
     image: vietnguyen-backend
